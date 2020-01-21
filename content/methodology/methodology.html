@@ -1,0 +1,281 @@
+---
+title: "Local Government Transparency Scores: Methodology"
+author:
+  - name: F. Daniel Hidalgo 
+    url: https://www.dhidalgo.me
+    affiliation: MIT
+    affiliation_url: https://www.mit.edu
+date: "2019-06-29"
+bibliography: citations.bib
+output: distill::distill_article
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>This document describes the methodology used to create the transparency
+indicators for the Government Transparency Project. We use webscraping and machine learning models to estimate whether a given website has the following transparency indicators:</p>
+<ul>
+<li><strong>Meeting Agendas (<em>AGD</em>)</strong>: Posted agendas for regular meetings of the main policy-making body (e.g. the city council or its equivalent) of the local government.</li>
+<li><strong>Budgets (<em>BDG</em>)</strong>: Town budget.</li>
+<li><strong>Public Bids (<em>BID</em>)</strong>: Posted information about bids for contracts to provide goods or services for the city.</li>
+<li><strong>Comprehensive annual financial reports (<em>CAFR</em>)</strong>: Posted annual financial reports.</li>
+<li><strong>Meeting Minutes (<em>MIN</em>)</strong>: Posted minutes for regular meetings of the main policy-making body (e.g. the city council or its equivalent) of the local government.</li>
+<li><strong>Public Records Requests Information (<em>REC</em>)</strong>: Description or form that states how to obtain public records.</li>
+</ul>
+<p>Below, we describe the specic data and algorithms used to generate the indicators included on the transparency report cards.</p>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<div id="training-sample" class="section level2">
+<h2>Training Sample</h2>
+<p>The sampling frame for our training sample are all US towns with a population
+greater than 1000, as measured by the 2010 census. Specifically, we use census
+data on “incorporated places” as our target population, which amounts to 39548
+administrative units.</p>
+<p>Our training sample consists of manually labeled indicators from 818 towns. The sample is broadly representative of the population of
+towns with populations greater than 1000 in the United States, with some
+over-representation of particular states such as New York and Texas.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> Because of the over-representation of towns
+from a few states, the typical town in our training sample is larger in
+population than the typical town in the US, but the distributions overlap
+substantially. This comparison is visualized in Figure
+<a href="#fig:trainingSampleHist">1</a>.</p>
+<div class="figure"><span id="fig:trainingSampleHist"></span>
+<img src="/methodology/methodology_files/figure-html/trainingSampleHist-1.png" alt="Distribution of Town Population in Training Sample and All US Towns with population greather than 1000." width="672" />
+<p class="caption">
+Figure 1: Distribution of Town Population in Training Sample and All US Towns with population greather than 1000.
+</p>
+</div>
+<p>The training sample towns represent 49
+distinct states. The geographic distribution of the training sample by state is depicted in Figure <a href="#fig:trainingSampleMap">2</a>.</p>
+<div class="figure"><span id="fig:trainingSampleMap"></span>
+<img src="/methodology/methodology_files/figure-html/trainingSampleMap-1.png" alt="Geographic Distribution of Towns in the Training Sample" width="672" />
+<p class="caption">
+Figure 2: Geographic Distribution of Towns in the Training Sample
+</p>
+</div>
+<div id="scraping-websites" class="section level3">
+<h3>Scraping Websites</h3>
+<p>To obtain the text data used to train the model or to label a website, we use
+the Python crawling framework <a href="https://scrapy.org">Scrapy</a>. Specifically, we
+crawl each website up to a depth of 2, with a maximum limit of 500 pages, and
+save the HTML of each crawled page. This depth limit means that in addition to the
+home page (level 0), we crawl pages that are linked from the home page (level 1), and pages that are
+linked from those pages as well (level 2). Finally, we impose a limit of 500 pages to keep
+the data of manageable size.</p>
+</div>
+<div id="creating-a-document-term-matrix" class="section level3">
+<h3>Creating a Document Term Matrix</h3>
+<p>For use in the classification model, we concatenate selected text from all pages
+of a given website and transform the text into a document term matrix (DTM).
+Specifically, from each scraped page we extract the (1) text in the title of the
+page, (2) the text in all links of each page, and (3) the full text of the page
+itself. Each set of text (i.e. title text, page text, or link text) is
+concatenated into a separate text string.</p>
+<p>We then transform and pre-process each string of text into a document term
+matrix using the <em>R</em> package <em>Quanteda</em><span class="citation">(Benoit et al. 2018)</span>. Specifically, we remove
+punctuation, symbols, hyphens, and a list of common stop words. After this
+pre-processing, we convert the string to a document-term matrix of unigram counts.
+When creating the training set, we remove any token that does not occur in more
+than 10% of the websites.</p>
+<p>After pre-processing and conversion is completed, the title text DTM,
+the link text DTM, and the page text DTM are combined into a single matrix,
+though columns denoting the term counts from each of the tree text types (links,
+titles, and pages) are kept in separate columns. The DTM generated from our
+training sample using these procedures has 13311 columns.</p>
+</div>
+</div>
+</div>
+<div id="classification-model" class="section level1">
+<h1>Classification Model</h1>
+<p>To classify websites we use a <em>random forest</em><span class="citation">(Breiman 2001)</span> model combined
+with a feature selection pre-processing step. The feature selection step reduces
+the dimensionality of the of the full DTM considerably and improves the
+predictive performance of the random forest model.</p>
+<div id="feature-selection" class="section level3">
+<h3>Feature Selection</h3>
+<p>The feature selection step relies on calculating a bivariate correlation between
+the transparency indicator and each column of the document term matrix.
+Specifically, we compute the <em>information gain</em> between the indicator and each
+column of the document term matrix, which is a univariate measure of association
+between the two variables.. We then rank the columns
+with respect to information gain and keep the top <span class="math inline">\(p\)</span>% percent of the variables,
+where <span class="math inline">\(p\)</span> is chosen via cross-validation.</p>
+<p>The proportion of terms retained for each model are as follows:</p>
+<ul>
+<li><em>AGD</em>: 0.11</li>
+<li><em>BDG</em>: 0.57</li>
+<li><em>BID</em>: 0.27</li>
+<li><em>CAFR</em>: 0.13</li>
+<li><em>MIN</em>: 0.2</li>
+<li><em>REC</em>: 0.12</li>
+</ul>
+</div>
+<div id="random-forest-model" class="section level3">
+<h3>Random Forest Model</h3>
+<p>After weakly correlated variables are pruned from the document term matrix via the feature selection step, we
+use a Random Forest model to predict the transparency indicator.
+Specifically, we use the implementation in the ranger<span class="citation">(Wright and Ziegler 2017)</span> package, which is
+optimized for speed. Each model is an ensemble of 500 different
+classification trees. When constructing individual trees, Random Forest models
+use only a
+random subset of both the training sample and the predictors (post-feature selection). Specifically,
+each tree uses a random sample (with replacement) of 0.9 of the number of units in
+the training sample. The predictors used in each tree are also a random sample,
+where the number of predictors retained is equal to the square root of the total
+number of predictors in the post-feature selection DTM.</p>
+<p>The only model hyper-parameter that is tuned performed is the proportion of
+variables to retain via the feature selection step described above. We use
+cross-validation on the combined feature selection and random forest procedures
+to choose an optimal proportion of variables to retain.</p>
+<p>To understand what aspects of the website are used when predicting each label,
+we computed the permutation importance of each column of the DTM. Specifically,
+we permute each column of the DTM and calculate the increase in prediction
+error. This statistic provides one measure of the relative importance of each
+unigram count from the website. The results for the 6 models can be found in
+Figure <a href="#fig:plot-perm-impt">3</a>. Unsurprisingly, the most predictive unigrams
+tend to be the labels themselves, such as “budgets”, “minutes”, etc.</p>
+<div class="figure"><span id="fig:plot-perm-impt"></span>
+<img src="/methodology/methodology_files/figure-html/plot-perm-impt-1.png" alt="Permutation Importance. Shows 10 columns of the document term matrix that have the highest permutation importance." width="768" />
+<p class="caption">
+Figure 3: Permutation Importance. Shows 10 columns of the document term matrix that have the highest permutation importance.
+</p>
+</div>
+</div>
+<div id="out-of-sample-performance" class="section level2">
+<h2>Out of Sample Performance</h2>
+<p>To estimate performance of the model, we use cross-validation. Specifically, we
+do 5-fold cross-validation, repeated 10 times. Table
+<a href="#tab:performance-table">1</a> reports the results for overall accuracy, positive
+predictive value, and negative predictive value. Positive predictive value is
+defined as the proportion of correct labels among sites labeled as having the
+indicator, while negative predictive value is the proportion of correct labels
+among sites labeled as not having the indicator.</p>
+<table class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:performance-table">Table 1: </span>Estimates of Out of Sample Error Using Cross-Validation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+label
+</th>
+<th style="text-align:right;">
+Accuracy
+</th>
+<th style="text-align:right;">
+Negative Predictive Value
+</th>
+<th style="text-align:right;">
+Positive Predictive Value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+REC
+</td>
+<td style="text-align:right;">
+0.77
+</td>
+<td style="text-align:right;">
+0.76
+</td>
+<td style="text-align:right;">
+0.79
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MIN
+</td>
+<td style="text-align:right;">
+0.84
+</td>
+<td style="text-align:right;">
+0.65
+</td>
+<td style="text-align:right;">
+0.88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CAFR
+</td>
+<td style="text-align:right;">
+0.80
+</td>
+<td style="text-align:right;">
+0.79
+</td>
+<td style="text-align:right;">
+0.81
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BID
+</td>
+<td style="text-align:right;">
+0.81
+</td>
+<td style="text-align:right;">
+0.82
+</td>
+<td style="text-align:right;">
+0.80
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BDG
+</td>
+<td style="text-align:right;">
+0.82
+</td>
+<td style="text-align:right;">
+0.76
+</td>
+<td style="text-align:right;">
+0.85
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AGD
+</td>
+<td style="text-align:right;">
+0.85
+</td>
+<td style="text-align:right;">
+0.79
+</td>
+<td style="text-align:right;">
+0.88
+</td>
+</tr>
+</tbody>
+</table>
+<div id="refs" class="references hanging-indent">
+<div id="ref-quanteda">
+<p>Benoit, Kenneth, Kohei Watanabe, Haiyan Wang, Paul Nulty, Adam Obeng, Stefan Müller, and Akitaka Matsuo. 2018. “Quanteda: An R Package for the Quantitative Analysis of Textual Data.” <em>Journal of Open Source Software</em> 3 (30): 774. <a href="https://doi.org/10.21105/joss.00774">https://doi.org/10.21105/joss.00774</a>.</p>
+</div>
+<div id="ref-breiman2001random">
+<p>Breiman, Leo. 2001. “Random Forests.” <em>Machine Learning</em> 45 (1): 5–32.</p>
+</div>
+<div id="ref-ranger">
+<p>Wright, Marvin N., and Andreas Ziegler. 2017. “ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R.” <em>Journal of Statistical Software</em> 77 (1): 1–17. <a href="https://doi.org/10.18637/jss.v077.i01">https://doi.org/10.18637/jss.v077.i01</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>These
+states were over-sampled because external validation data exists for towns in
+these states. This external validation data will be used to assess the overall
+validity of the transparency score.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

@@ -1,0 +1,46 @@
+---
+title: "Georgia Transparency Report Cards"
+date: '2020-01-16'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(fs)
+library(kableExtra)
+library(drake)
+```
+
+```{r, message=FALSE, warning=FALSE}
+loadd(predicted)
+
+
+report_cards <- dir_ls("../../../analysis/report_cards/", regexp = "html$") %>%
+  gsub(pattern = ".*/(.*)$", x = ., replacement = "\\1")
+
+report_cards_data <-   tibble(fips = gsub("^([0-9]{1,})-.*", "\\1", report_cards),
+         City = str_replace(gsub(".*-(.*)-Transparency.*", "\\1", report_cards), "_", replacement = " "))
+report_cards_data$Link <- paste0("[Link](", report_cards, ")")
+
+ga_predicted <- filter(predicted, ST_FIPS %in% report_cards_data$fips) %>%
+  group_by(ST_FIPS) %>%
+  summarise(score = sum(label)) %>%
+  mutate(Grade = case_when(score == 6 ~ "A",
+                        score == 5 ~ "B+",
+                        score == 4 ~ "B",
+                        score == 3 ~ "C+",
+                        score == 2 ~ "C",
+                        score == 1 ~ "D",
+                        score == 0 ~ "F"),
+         ST_FIPS = as.character(ST_FIPS)) %>%
+  rename("fips" = "ST_FIPS")
+
+report_cards_data <- left_join(report_cards_data, ga_predicted)
+
+kable(select(report_cards_data, City, Grade, Link))
+
+```
+
+
+
