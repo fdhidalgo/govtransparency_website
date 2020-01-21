@@ -3127,7 +3127,7 @@ indicators for the Government Transparency Project. We use webscraping and machi
 &lt;li&gt;&lt;strong&gt;Meeting Minutes (&lt;em&gt;MIN&lt;/em&gt;)&lt;/strong&gt;: Posted minutes for regular meetings of the main policy-making body (e.g. the city council or its equivalent) of the local government.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Public Records Requests Information (&lt;em&gt;REC&lt;/em&gt;)&lt;/strong&gt;: Description or form that states how to obtain public records.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Below, we describe the specic data and algorithms used to generate the indicators included on the transparency report cards.&lt;/p&gt;
+&lt;p&gt;Below, we describe the specific data and algorithms used to generate the indicators included on the transparency report cards.&lt;/p&gt;
 &lt;div id=&#34;data&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Data&lt;/h1&gt;
 &lt;div id=&#34;training-sample&#34; class=&#34;section level2&#34;&gt;
