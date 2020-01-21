@@ -8,7 +8,7 @@ headless = true  # This file represents a page section.
 active = true  # Activate this widget? true/false
 weight = 15  # Order that this section will appear.
 
-title = "About the Project  "
+title = "How transparent is your local government?"
 #subtitle = "*Shedding light on local democracy using Big Data*"
 
 [design]
@@ -50,6 +50,11 @@ title = "About the Project  "
  css_class = ""
 +++
 
-Welcome to the website of the **Local Government Transparency Project**, a research project by MIT/GOVLAB. We use predictive modeling to measure the transparency of local governments in the United States.   
+How does your town spend taxpayer money? Can you find out what your representatives discussed at  town council meetings? How does your town's transparency compare to other local governments? 
+
+
+At [MIT](https://www.mit.edu) [GOV/LAB](https://mitgovlab.org), we've used predictive modeling to assign transparency scores to local governments across the United States. While most will agree that government transparency is important, measuring transparency for a large number of governments can be costly and time-intensive. Using  big data [methods](methodology/methodology/), we were able to grade thousands of town websites on whether they contain basic information about how your government operates. 
+
+Questions? Contact us at [govt_transparency@mit.edu](mailto:govt_transparency@mit.edu).
 
 
