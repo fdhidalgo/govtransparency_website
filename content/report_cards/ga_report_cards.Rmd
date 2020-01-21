@@ -14,7 +14,15 @@ library(drake)
 
 ```{r, message=FALSE, warning=FALSE}
 loadd(predicted)
+loadd(labels)
 
+##Add manually labeled
+labels <- labels %>%
+  rename('manual_label' = "label") %>%
+  select(ST_FIPS, variable, manual_label)
+predicted <- left_join(predicted, labels) %>%
+  mutate(label =  ifelse(is.na(manual_label), label, manual_label)) %>%
+  select(-manual_label)
 
 report_cards <- dir_ls("../../../analysis/report_cards/", regexp = "html$") %>%
   gsub(pattern = ".*/(.*)$", x = ., replacement = "\\1")
