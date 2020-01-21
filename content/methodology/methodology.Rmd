@@ -35,7 +35,7 @@ indicators for the Government Transparency Project. We use webscraping and machi
 - **Meeting Minutes (*MIN*)**: Posted minutes for regular meetings of the main policy-making body (e.g. the city council or its equivalent) of the local government.
 - **Public Records Requests Information (*REC*)**: Description or form that states how to obtain public records.
 
-Below, we describe the specic data and algorithms used to generate the indicators included on the transparency report cards.
+Below, we describe the specific data and algorithms used to generate the indicators included on the transparency report cards.
 
 # Data
 
