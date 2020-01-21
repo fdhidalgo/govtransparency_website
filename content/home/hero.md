@@ -38,13 +38,13 @@ title = "MIT Government Transparency Project"
 #   Remove a link/note by deleting a cta/note block.
 
 [cta]
-  url = "https://sourcethemes.com/academic/docs/install/"
+  url = "/report_cards/ga_report_cards/"
   label = "View Report Cards"
 #  icon_pack = "fas"
 #  icon = "download"
   
 [cta_alt]
-  url = "https://sourcethemes.com/academic/"
+  url = "/methodology/methodology"
   label = "View Methodology"
 +++
 
