@@ -38,5 +38,5 @@ user_groups:
 - Researchers 
 - Visitors
 ---
-<br>
+
 I'm an Associate Professor of [Political Science](https://polisci.mit.edu/) at [MIT](https://www.mit.edu). My research focuses on understanding how democracies in low and middle income societies work. My  work has focused the role of horizontal and electoral accountability in promoting good governance, money in politics, and the ways political institutions shape electoral outcomes. Most of my work has drawn on data from  Latin America, especially Brazil.  At MIT, I teach courses on statistics for the social sciences, elections and representation in the developing world, and Latin American politics. 
