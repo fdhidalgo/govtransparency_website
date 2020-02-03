@@ -16,7 +16,6 @@ library(drake)
 loadd(predicted)
 loadd(labels)
 
-
 ##Add manually labeled
 labels <- labels %>%
   rename('manual_label' = "label") %>%
