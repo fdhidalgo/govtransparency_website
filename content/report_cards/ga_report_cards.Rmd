@@ -30,6 +30,7 @@ report_cards <- dir_ls("../../../analysis/report_cards/", regexp = "html$") %>%
 report_cards_data <-   tibble(fips = gsub("^([0-9]{1,})-.*", "\\1", report_cards),
          City = str_replace(gsub(".*-(.*)-Transparency.*", "\\1", report_cards), "_", replacement = " "))
 report_cards_data$Link <- paste0("[Link](http://www.gov-reportcard.net/", report_cards, ")")
+report_cards_data$City <- str_replace(report_cards_data$City, "_City", " City")
 
 ga_predicted <- filter(predicted, ST_FIPS %in% report_cards_data$fips) %>%
   group_by(ST_FIPS) %>%
