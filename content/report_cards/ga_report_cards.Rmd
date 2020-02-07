@@ -48,7 +48,6 @@ ga_predicted <- filter(predicted, ST_FIPS %in% report_cards_data$fips) %>%
 report_cards_data <- left_join(report_cards_data, ga_predicted)
 
 kable(select(report_cards_data, City, Grade, Link))
-
 ```
 
 
